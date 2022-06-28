@@ -1,52 +1,51 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const Thing = require('./models/thing');
-mongoose.connect('mongodb+srv://papai:kannabe@cluster0.pejoepy.mongodb.net/?retryWrites=true&w=majority',
-  { useNewUrlParser: true,
-    useUnifiedTopology: true })
-  .then(() => console.log('Connexion à MongoDB réussie !'))
-  .catch(() => console.log('Connexion à MongoDB échouée !'));
-  
+const express = require("express");
+const cors = require("cors");
+const createError = require("http-errors");
+const dotenv = require('dotenv').config();
 
 const app = express();
+
 app.use(express.json());
 
-app.post('/api/stuff', (req, res, next) => {
-    delete req.body._id;
-    const thing = new Thing({
-      ...req.body
+app.use(cors());
+
+app.use(express.urlencoded({extended:true }))
+
+//initialize the data base
+require('./dataBaseConnexion')();
+
+app.all('/test',(req, res)=>{
+    // console.log(req.query);
+    // res.send(req.query)
+
+    // console.log(req.params);
+    // res.send(req.params) 
+    //let me push my app 
+    //jjjjjjj
+
+    console.log(req.body),
+    res.send(req.body)
+})
+const ThingRoutes = require('./Routes/Things.routes');
+app.use("/", ThingRoutes);
+
+app.use((req,res,next) =>{
+    // const theError = new Error("Not found");
+    // theError.status = 404;
+    // next(theError);
+    next(createError(404,"Not Found"));
+})
+
+//Error Handler
+app.use((err, req, res, next) =>{
+    res.status(err.status || 500 ); 
+    res.send({
+        error:{
+            status: err.status || 500,
+            message: err.message
+        }
     });
-    thing.save()
-      .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
-      .catch(error => res.status(400).json({ error }));
-  });
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    next();
-  });
+});
 
-app.use('/api/stuff', (req, res, next) => {
-    const stuff = [
-      {
-        _id: 'oeihfzeoi',
-        title: 'Mon premier objet',
-        description: 'Les infos de mon premier objet',
-        imageUrl: 'https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg',
-        price: 4900,
-        userId: 'qsomihvqios',
-      },
-      {
-        _id: 'oeihfzeomoihi',
-        title: 'Mon deuxième objet',
-        description: 'Les infos de mon deuxième objet',
-        imageUrl: 'https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg',
-        price: 2900,
-        userId: 'qsomihvqios',
-      },
-    ];
-    res.status(200).json(stuff);
-  });
-
-module.exports = app;
+const PORT = process.env.PORT || 5000
+app.listen(PORT, ()=> console.log('The server run on port' + ' ' + PORT + '....'))
