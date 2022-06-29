@@ -1,48 +1,43 @@
-const http = require('http');
-const app = require('./app');
-
-const normalizePort = val => {
-  const port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    return val;
-  }
-  if (port >= 0) {
-    return port;
-  }
-  return false;
-};
-const port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
+const express = require("express");
+const cors = require("cors");
+const createError = require("http-errors");
+//initialize the data base
+const connection = require('./mysqlConnexion');
+const app = express();
 
 
-const errorHandler = error => {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-  const address = server.address();
-  const bind = typeof address === 'string' ? 'pipe ' + address : 'port: ' + port;
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges.');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use.');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
-};
+app.use(express.json());
 
-const server = http.createServer(app);
- 
-server.on('error', errorHandler);
-server.on('listening', () => {
-  const address = server.address();
-  const bind = typeof address === 'string' ? 'pipe ' + address : 'port ' + port;
-  console.log('Listening on ' + bind);
+app.use(cors());
+
+app.use(express.urlencoded({extended:true }))
+
+
+
+
+const commerceRoutes = require('./Routes/Commerce.mysql.routes');
+app.use("/", commerceRoutes);
+
+app.use((req,res,next) =>{
+    // const theError = new Error("Not found");
+    // theError.status = 404;
+
+
+    
+    // next(theError);
+    next(createError(404,"Not Found"));
+})
+
+//Error Handler
+app.use((err, req, res, next) =>{
+    res.status(err.status || 500 ); 
+    res.send({
+        error:{
+            status: err.status || 500,
+            message: err.message
+        }
+    });
 });
 
-server.listen(port);
+const PORT = process.env.PORT || 6000
+app.listen(PORT, ()=> console.log('The server run on port' + ' ' + PORT + '....'))

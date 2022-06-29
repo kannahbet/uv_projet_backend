@@ -1,13 +1,7 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const Thing = require('./models/thing');
-
-mongoose.connect('mongodb+srv://papai:kannabe@cluster0.pejoepy.mongodb.net/?retryWrites=true&w=majority',
-  { useNewUrlParser: true,
-    useUnifiedTopology: true })
-  .then(() => console.log('Connexion à MongoDB réussie !'))
-  .catch(() => console.log('Connexion à MongoDB échouée !'));
-  
+const express = require("express");
+const cors = require("cors");
+const createError = require("http-errors");
+const dotenv = require('dotenv').config();
 
 const app = express();
 

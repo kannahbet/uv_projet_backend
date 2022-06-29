@@ -1,6 +1,11 @@
+###
+GET http://localhost:6000/product
+###
+GET http://localhost:6000/users
 
-GET http://localhost:5000/
 
+###
+GET http://localhost:6000/temps
 ###
 POST http://localhost:5000/post_thing HTTP/1.1
 header name: header value
