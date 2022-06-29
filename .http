@@ -1,0 +1,10 @@
+
+GET http://localhost:5000/
+
+###
+POST http://localhost:5000/post_thing HTTP/1.1
+header name: header value
+
+{
+    
+}

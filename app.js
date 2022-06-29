@@ -13,26 +13,45 @@ const app = express();
 
 app.use(express.json());
 
+app.use(cors());
 
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    next();
-  });
-  app.post('/api/stuff', (req, res, next) => {
-    delete req.body._id;
-    const thing = new Thing({
-      ...req.body
+app.use(express.urlencoded({extended:true }))
+
+//initialize the data base
+require('./dataBaseConnexion')();
+
+app.all('/test',(req, res)=>{
+    // console.log(req.query);
+    // res.send(req.query)
+
+    // console.log(req.params);
+    // res.send(req.params) 
+    //let me push my app 
+    //jjjjjjj
+
+    console.log(req.body),
+    res.send(req.body)
+})
+const ThingRoutes = require('./Routes/Things.routes');
+app.use("/", ThingRoutes);
+
+app.use((req,res,next) =>{
+    // const theError = new Error("Not found");
+    // theError.status = 404;
+    // next(theError);
+    next(createError(404,"Not Found"));
+})
+
+//Error Handler
+app.use((err, req, res, next) =>{
+    res.status(err.status || 500 ); 
+    res.send({
+        error:{
+            status: err.status || 500,
+            message: err.message
+        }
     });
-    thing.save()
-      .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
-      .catch(error => res.status(400).json({ error }));
-  });
-app.use('/api/stuff', (req, res, next) => {
-  Thing.find()
-  .then(things => res.status(200).json(things))
-  .catch(error => res.status(400).json({ error }));
-  });
+});
 
-module.exports = app;
+const PORT = process.env.PORT || 6000
+app.listen(PORT, ()=> console.log('The server run on port' + ' ' + PORT + '....'))
