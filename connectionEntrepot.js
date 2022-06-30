@@ -4,7 +4,7 @@ const mysqli = require('mysql');
         host:"localhost",
         user:"root",
         password:"",
-        database:"ventes_datamart"
+        database:"entrepot"
     });
     connectionentrepot.connect((error) =>{
         if(!error){

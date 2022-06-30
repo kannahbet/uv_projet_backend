@@ -1,24 +1,27 @@
 const connection = require('../mysqlConnexion')
 const connectionentrepot = require('../connectionEntrepot')
+const Papa = require("papaparse"),
+  fs = require("fs");
+  
 
 module.exports = {
     getAllProduct: async (req,res,next) =>{
        
-        var query = "SELECT DISTINCT p.`Refpro` , p.`title` , c.`nom` FROM commerce.produit p, commerce.cathegories c where p.`category`=c.`codeC`";
+        var query = "SELECT DISTINCT p.`Refpro` ,p.`price` , p.`title` , c.`nom` FROM commerce.produit p, commerce.cathegories c where p.`category`=c.`codeC`";
         connection.query(query,(err,result) =>{
             if(!err){
                  var product=result;
                 // console.log(product)
                 product.forEach(insertInMart);
             } else{
-                console.log("echec")
+                res.status(404).json({message:"echec pour insertion produit"})
             }
             
         })
 
         insertInMart = (product) =>{
-            querry = "INSERT INTO produits(idProduits,NomProd,CatProd) VALUES(?,?,?)";
-            connectionentrepot.query(querry,[product.Refpro,product.title,product.nom],(err,results)=>{
+            querry = "INSERT INTO produits(idProduits,NomProd,CatProd,prix) VALUES(?,?,?,?)";
+            connectionentrepot.query(querry,[product.Refpro,product.title,product.nom,product.price],(err,results)=>{
                 if(!err){
                     console.log(product.nom)
                 }
@@ -29,109 +32,96 @@ module.exports = {
        
     },
 
-    getAllUsers: async (req,res, next) =>{
-        var query = " SELECT code_client , email, username , first_name, last_name, title FROM client";
-        connection.query(query,(err1,result1) =>{
-            if(!err1){
-                var client = result1;
-                client.forEach(insertInMart1)
-            }
-            else{
-                console.log("echec")
-            }
-            
-        })
-
-        insertInMart1 = (client) =>{
-            querry = "INSERT INTO clients(idClients,NomClient,Pays) VALUES(?,?,?)";
-            connectionentrepot.query(querry,[client.code_client,client.username,client.first_name],(err,results)=>{
-                if(!err){
-                    console.log(client.username)
-                }
-            })
-        }
-        res.status(200).json({message:"succes pour client"})
-        next();
-    },
 
     getAllTemps: async (req,res, next) =>{
-        let date = new Date();
-        let jour = date.getDate()
-        let mois = date.getMonth()
+ 
 
-        var query =  "SELECT DISTINCT Datecommande FROM commande c"
+        var query =  "SELECT DISTINCT Datecommande FROM commande"
         connection.query(query,(err2,result2) =>{
             if(!err2){
                 var commande = result2;
                 commande.forEach(insertInMart2)
             }
             else{
-                console.log('Echec')
+                res.status(404).json({message:"echec pour insertion temps"})
             }
         })
 
         insertInMart2 = (commande) =>{
-            querry = "INSERT INTO temps(jours,Mois) VALUES(?,?)";
+            querry = "INSERT INTO temps(day,month,year,trimestre) VALUES(?,?,?,?)";
             let date = commande.Datecommande;
             let jour = date.getDate()
             let mois = date.getMonth()+1;
+            let trim=0;
+            if(mois <4){
+                trim=1;  
+            } else if(mois<7){
+                trim=2;
+            }else if(mois<9){
+                trim=3;
+            }else {
+                trim=4;
+            }
             let years = date.getFullYear()
-            let format=years+"-"+mois+"-"+jour+" 00:00"
-            console.log(format)
-            connectionentrepot.query(querry,[format,mois],(err,results)=>{
+          let format=years+"-"+mois+"-"+jour+" 00:00"
+            connectionentrepot.query(querry,[format,mois,years,trim],(err,results)=>{
                 if(!err){
                     console.log(jour+"-"+mois)
                 }
             })
         }
-        res.status(200).json({message:"succes pour commande"})
-        next();
+        res.status(200).json({message:"succes pour temps"});
     },
 
 
-    // getAllVente: async (req,res, next) =>{
-    //     var query =  "SELECT sum(d.`quantite`) as quantity,sum(d.`quantite`*p.price) as prix, date(c.`Datecommande`) as date,p.`Refpro`, CAST(clt.`Code_client` as varchar(10)) as `codeC` FROM `details _commande` d,`produit` p , `commande` c , `client` clt where clt.`Code_client` = c.`destinataire`and c. `id_commande`=d.`ref_comma` and p.`Refpro`=d.`ref_prod` group by month(c.`dateCommande`),p.`Refpro`, clt.`code_client`"
-    //     connection.query(query,(err3,result3) =>{
-    //         if(!err3){
-    //             var vente = result3;
-    //             vente.forEach(insertInMart3)
-    //         }
-    //         else{
-    //             return res.status(500).json(err2)
-    //         }
-    //         next();
-    //     })
+    getAllFaits: async (req,res, next) =>{
+        var query =  "SELECT SUM(d.`quantite`) as sales,SUM(d.`quantite`*p.price) as qaunt, c.Datecommande,p.`Refpro` FROM `details _commande` d,`produit` p , `commande` c WHERE c. `id_commande`=d.`ref_comma` AND p.`Refpro`=d.`ref_prod` GROUP BY month(c.`dateCommande`),p.`Refpro`;"
+        connection.query(query,(err4,result4) =>{
+            if(!err4){
+                var temps = result4;
+                temps.forEach(insertInMart4)
+            }
+            else{
+                res.status(404).json({message:"echec pour insertion des faits"})
+            }
+            next();
+        })
 
-    //     insertInMart1 = (vente) =>{
-    //         querry = "INSERT INTO ventes(QuantiteVentes,MontantVentes,Temps_jours,Produits_idProduits,Clients_idClients) VALUES(?,?,?,?,?)";
-    //         connectionentrepot.query(querry,[vente.quantity, vente.prix,vente.date,vente.Refpro,vente.codeC,],(err,results)=>{
-    //             if(!err){
-    //                 console.log(product.nom)
-    //             }
-    //         })
-    //     }
-    // },
+        insertInMart4 = (faits) =>{
+            querry = "INSERT INTO ventes(sales,quantity,Temps_jours,Produits_idProduits) VALUES(?,?,?,?)";
+            let date = faits.Datecommande;
+            let jour = date.getDate()
+            let mois = date.getMonth()+1;
+            let years = date.getFullYear()
+            let format=years+"-"+mois+"-"+jour+" 00:00"
+            connectionentrepot.query(querry,[faits.qaunt,faits.sales,format,faits.Refpro],(err,results)=>{
+                if(!err){
+                    console.log(faits.sales)
+                }
+            })
+            
+        }
+        res.status(200).json({message:"succes pour faits"});
+    },
 
-    // getAllTemps: async (req,res, next) =>{
-    //     var query =  "SELECT DISTINCT Date(c.`Datecommande`), month(c.`Moiscommande`) FROM commande c"
-    //     connection.query(query,(err4,result4) =>{
-    //         if(!err4){
-    //             var temps = result3;
-    //             temps.forEach(insertInMart4)
-    //         }
-    //         else{
-    //             return res.status(500).json(err4)
-    //         }
-    //         next();
-    //     })
-
-    //     insertInMart1 = (temps) =>{
-    //         querry = "INSERT INTO ventes(QuantiteVentes,MontantVentes,Temps_jours,Produits_idProduits,Clients_idClients) VALUES(?,?,?,?,?)";
-    //         connectionentrepot.query(querry,[temps.Datecommande,temps.Moiscommande],(err,results)=>{
-    //             if(!err){
-    //                 console.log(product.nom)
-    //             }
-    //         })
-    //     }
-    // }
+    getAllCsv: async (req,res, next) =>  {
+        var query = "SELECT * FROM ventes`";
+connectionentrepot.query(query,(err,result) =>{
+            if(!err){
+                 
+try {
+    var csv_data = Papa.unparse(result);
+    fs.writeFile("./export.csv", csv_data, { flag: 'w' }, function(){
+        res.status(200).json({message:"succes creation de csv"});
+    });
+  } catch(e){
+    res.status(404).json({message:"echec de creation  csv"})
+  }
+               
+                
+            } else{
+                res.status(404).json({message:"erreur de requette"})
+            }
+})
+    }
 }
