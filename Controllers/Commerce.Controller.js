@@ -73,10 +73,12 @@ module.exports = {
         insertInMart2 = (commande) =>{
             querry = "INSERT INTO temps(jours,Mois) VALUES(?,?)";
             let date = commande.Datecommande;
-            let jour = date
+            let jour = date.getDate()
             let mois = date.getMonth()+1;
-            console.log(jour+"-"+mois)
-            connectionentrepot.query(querry,[jour,mois],(err,results)=>{
+            let years = date.getFullYear()
+            let format=years+"-"+mois+"-"+jour+" 00:00"
+            console.log(format)
+            connectionentrepot.query(querry,[format,mois],(err,results)=>{
                 if(!err){
                     console.log(jour+"-"+mois)
                 }
