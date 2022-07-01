@@ -105,14 +105,15 @@ module.exports = {
     },
 
     getAllCsv: async (req,res, next) =>  {
-        var query = "SELECT * FROM ventes`";
+        var query = "SELECT idProduits,CatProd,prix,sales,quantity,month,year,trimestre FROM ventes v,produits p,temps t WHERE v.temps_jours=t.day AND v.Produits_idProduits=p.idProduits";
 connectionentrepot.query(query,(err,result) =>{
             if(!err){
-                 
+
+                res.status(200).json(result);
 try {
-    var csv_data = Papa.unparse(result);
+   var csv_data = Papa.unparse(result);
     fs.writeFile("./export.csv", csv_data, { flag: 'w' }, function(){
-        res.status(200).json({message:"succes creation de csv"});
+        console.log('reussi')
     });
   } catch(e){
     res.status(404).json({message:"echec de creation  csv"})

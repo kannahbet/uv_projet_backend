@@ -1,7 +1,7 @@
-sales,quantity,Temps_jours,Produits_idProduits
-3738,34,2020-06-09T23:00:00.000Z,1
-446,20,2020-06-09T23:00:00.000Z,2
-11120,16,2020-06-09T23:00:00.000Z,5
-2352,14,2020-06-09T23:00:00.000Z,6
-784,14,2020-12-31T23:00:00.000Z,3
-336,2,2021-02-01T23:00:00.000Z,6
+idProduits,CatProd,prix,sales,quantity,month,year,trimestre
+1,mens clothing,110,3738,34,6,2020,2
+2,mens clothing,22,446,20,6,2020,2
+5,jewelery,695,11120,16,6,2020,2
+6,jewelery,168,2352,14,6,2020,2
+3,mens clothing,56,784,14,1,2021,1
+6,jewelery,168,336,2,2,2021,1
