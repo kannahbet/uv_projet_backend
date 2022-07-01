@@ -2,9 +2,10 @@
 GET http://localhost:5000/
 
 ###
-POST http://localhost:5000/post_thing HTTP/1.1
-header name: header value
+POST http://localhost:5000/post_thing
+Content-Type: application/json
 
 {
-    
+    "title":"Les  aventures de jqson la nuit",
+    "price":876543
 }
