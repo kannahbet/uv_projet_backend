@@ -1,5 +1,10 @@
+###
+GET http://localhost:6000/product
 
-GET http://localhost:5000/
+###
+GET http://localhost:6000/temps
+###
+GET http://localhost:6000/faits
 
 ###
 POST http://localhost:5000/post_thing
